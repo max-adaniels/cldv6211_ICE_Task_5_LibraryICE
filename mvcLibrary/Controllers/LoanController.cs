@@ -20,32 +20,23 @@ namespace mvcLibrary.Controllers
         }
 
         // GET: Loan
-        public async Task<IActionResult> Index(string searchValue)
+        public async Task<IActionResult> Index(string bookFilter, string startDate, string endDate)
         {
-            // Fetch all bookings including related Venue and Event data
-            var loan = from b in _context.Loan.Include(b => b.Book)
-                       select b;
+            var loans = await _context.Loan.ToListAsync();
+            var books = await _context.Book.ToListAsync();
 
-            // Proceed if either searchBy or searchValue is not null/empty
-            if (!string.IsNullOrWhiteSpace(searchValue))
+            ViewBag.BookOptions = new SelectList(books, "BookID", "Title");
+
+            if (!String.IsNullOrEmpty(bookFilter))
             {
-                // If searchValue is empty or whitespace, return full booking list
-                if (string.IsNullOrWhiteSpace(searchValue))
-                {
-                    return View(loan);
-                }
-                else
-                {
-                    loan = loan.Where(b =>
-                        b.LoanID.ToString() == searchValue ||
-                        (b.Book.Title != null && b.Book.Title.ToLower().Contains(searchValue))); 
-                }
-
+                loans = loans.Where(s => s.BookID.ToString() == bookFilter).ToList();
             }
 
-            // If no search parameters are provided, return all bookings
-            return View(loan);
+
+            return View(loans);
         }
+
+
 
         // GET: Loan/Details/5
         public async Task<IActionResult> Details(int? id)
