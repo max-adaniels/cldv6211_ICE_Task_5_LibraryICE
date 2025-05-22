@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -20,32 +21,25 @@ namespace mvcLibrary.Controllers
         }
 
         // GET: Book
-        public async Task<IActionResult> Index(string searchValue, string clear)
+        public async Task<IActionResult> Index(string nameFilter, string typeFilter)
         {
-            // Fetch all bookings including related Venue and Event data
-            var book = from b in _context.Book.Include(b => b.Type)
-                       select b;
+            var books = await _context.Book.ToListAsync();
+            var types = await _context.BookType.ToListAsync();
 
-            // Proceed if either searchBy or searchValue is not null/empty
-            if (!string.IsNullOrWhiteSpace(searchValue))
+            ViewBag.TypeOptions = new SelectList(types, "TypeID", "Type");
+
+            if (!String.IsNullOrEmpty(nameFilter))
             {
-                // If searchValue is empty or whitespace, return full booking list
-                if (string.IsNullOrWhiteSpace(searchValue))
-                {
-                    return View(book);
-                }
-                else
-                {
-                    book = book.Where(b =>
-                        (b.Title != null && b.Title.ToLower().Contains(searchValue)) ||
-                        (b.ISBN != null && b.ISBN.ToLower().Contains(searchValue)) ||
-                        (b.Author != null && b.Author.ToLower().Contains(searchValue)));
-                }
-
+                books = books.Where(s => s.Title.Contains(nameFilter)).ToList();
             }
 
-            // If no search parameters are provided, return all bookings
-            return View(book);
+            if (!String.IsNullOrEmpty(typeFilter))
+            {
+                books = books.Where(s => s.TypeID.ToString() == typeFilter).ToList();
+            }
+
+
+            return View(books);
         }
 
 
