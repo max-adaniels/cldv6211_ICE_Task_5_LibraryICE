@@ -37,11 +37,9 @@ namespace mvcLibrary.Controllers
                 else
                 {
                     book = book.Where(b =>
-                        b.BookID.ToString() == searchValue ||
                         (b.Title != null && b.Title.ToLower().Contains(searchValue)) ||
                         (b.ISBN != null && b.ISBN.ToLower().Contains(searchValue)) ||
-                        (b.Author != null && b.Author.ToLower().Contains(searchValue)) ||
-                        (b.Type.Type != null && b.Type.Type.ToLower().Contains(searchValue)));
+                        (b.Author != null && b.Author.ToLower().Contains(searchValue)));
                 }
 
             }
